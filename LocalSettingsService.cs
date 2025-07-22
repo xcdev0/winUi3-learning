@@ -3,7 +3,14 @@ using Windows.Storage;
 
 namespace App1.Utilities
 {
+    internal class SettingsManager
+    {
 
+        private static readonly ISettingsService _service = new LocalSettingsService();
+
+        public static ApplicationSettings Settings { get; } = new ApplicationSettings(_service);
+
+    }
 
 
     public class ApplicationSettings
@@ -90,7 +97,7 @@ namespace App1.Utilities
 
                 if (localSettings.Values.ContainsKey(key)) localSettings.Values[key] = storedValue;
 
-                else localSettings.Values.Add(key, value);
+                else localSettings.Values.Add(key, storedValue);
             }
             catch (Exception ex)
             {
@@ -159,3 +166,76 @@ namespace App1.Utilities
 
     }
 }
+
+// usage example 
+/*
+ <Page
+    x:Class="App1.GUI.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App1.GUI"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="10" Padding="20">
+        
+        <TextBlock x:Name="CurrentUsernameTextBlock"
+                   FontSize="18"
+                   Text="Current username will appear here" />
+
+        <TextBox x:Name="UsernameInput"
+                 PlaceholderText="Enter new username" />
+
+        <Button Content="Save Username"
+                Click="SaveUsername_Click" />
+
+    </StackPanel>
+</Page>
+
+
+
+
+using App1.Utilities;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+
+// To learn more about WinUI, the WinUI project structure,
+// and more about our project templates, see: http://aka.ms/winui-project-info.
+
+namespace App1.GUI
+{
+
+    public sealed partial class HomePage : Page
+    {
+        public HomePage()
+        {
+
+
+            InitializeComponent();
+            CurrentUsernameTextBlock.Text = $"Current Username: {SettingsManager.Settings.Username ?? "(not set)"}";
+
+        }
+
+        private void SaveUsername_Click(object sender, RoutedEventArgs e)
+        {
+            var newUsername = UsernameInput.Text;
+
+            if (!string.IsNullOrWhiteSpace(newUsername))
+            {
+                // حفظ الاسم في الإعدادات
+                SettingsManager.Settings.Username = newUsername;
+
+                // تحديث العرض
+                CurrentUsernameTextBlock.Text = $"Current Username: {newUsername}";
+            }
+            else
+            {
+                CurrentUsernameTextBlock.Text = "⚠ Please enter a username.";
+            }
+        }
+    }
+}
+
+
+ */
